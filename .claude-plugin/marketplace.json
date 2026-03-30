@@ -20,6 +20,27 @@
       "source": "./journal",
       "category": "productivity",
       "version": "1.0.0"
+    },
+    {
+      "name": "generate",
+      "description": "Skills for generating architectural briefings, commit messages, and technical diagrams",
+      "source": "./generate",
+      "category": "productivity",
+      "version": "1.0.0"
+    },
+    {
+      "name": "chezmoi",
+      "description": "Reference guide and workflow for managing dotfiles with chezmoi",
+      "source": "./chezmoi",
+      "category": "reference",
+      "version": "1.0.0"
+    },
+    {
+      "name": "jujutsu",
+      "description": "Reference guide for Jujutsu (jj) version control system",
+      "source": "./jujutsu",
+      "category": "reference",
+      "version": "1.0.0"
     }
   ]
 }

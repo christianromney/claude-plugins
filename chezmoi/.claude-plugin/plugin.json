@@ -1,0 +1,5 @@
+{
+  "name": "chezmoi",
+  "version": "1.0.0",
+  "description": "Reference guide and workflow for managing dotfiles with chezmoi"
+}
