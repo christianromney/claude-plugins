@@ -1,0 +1,18 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "christianromney-claude-plugins",
+  "description": "Christian Romney's personal Claude Code plugin marketplace",
+  "owner": {
+    "name": "Christian Romney",
+    "email": "christian.romney@nubank.com.br"
+  },
+  "plugins": [
+    {
+      "name": "usage-insights",
+      "description": "Generate time-aware, config-aware HTML usage insight reports from Claude Code session data with trend classification and config-awareness",
+      "source": "./usage-insights",
+      "category": "productivity",
+      "version": "1.0.0"
+    }
+  ]
+}
