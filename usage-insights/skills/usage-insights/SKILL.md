@@ -32,19 +32,6 @@ session data. Output: `~/.claude/usage-insights/report-{timestamp}.html`.
 Executes in six sequential phases. Complete all phases before printing the
 confirmation message.
 
-## Preamble: Locate Scripts Directory
-
-Before executing any phase, determine the scripts directory:
-
-```bash
-REPO_ROOT=$(git rev-parse --show-toplevel)
-SCRIPTS_DIR="$REPO_ROOT/resources/christian.romney/skills/usage-insights/scripts"
-```
-
-All `clojure -M:<alias>` commands below are run with `cd "$SCRIPTS_DIR" &&`.
-
----
-
 ## Phase 1 — Setup & Collect
 
 Create output directory if absent:
@@ -56,7 +43,7 @@ mkdir -p ~/.claude/usage-insights
 Run collect-sessions and capture the JSON output:
 
 ```bash
-cd "$SCRIPTS_DIR" && clojure -M:collect \
+cd scripts && clojure -M:collect \
   --session-dir ~/.claude/usage-data/session-meta \
   --facets-dir  ~/.claude/usage-data/facets \
   --checkpoint  ~/.claude/usage-insights/checkpoint.json \
@@ -89,7 +76,7 @@ Process sessions one at a time. Skip this phase if `unfaceted_ids` is empty.
 Read the current config inventory:
 
 ```bash
-cd "$SCRIPTS_DIR" && clojure -M:config --claude-dir ~/.claude
+cd scripts && clojure -M:config --claude-dir ~/.claude
 ```
 
 Store the JSON output as `CONFIG_SNAPSHOT`.
@@ -97,7 +84,7 @@ Store the JSON output as `CONFIG_SNAPSHOT`.
 Merge all sessions from `new_sessions` into the checkpoint:
 
 ```bash
-cd "$SCRIPTS_DIR" && clojure -M:merge \
+cd scripts && clojure -M:merge \
   --checkpoint       ~/.claude/usage-insights/checkpoint.json \
   --session-meta-dir ~/.claude/usage-data/session-meta \
   --facets-dir       ~/.claude/usage-data/facets \
