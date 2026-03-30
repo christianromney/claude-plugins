@@ -62,12 +62,14 @@ Parse the JSON output. Store:
 For each session ID in `unfaceted_ids`:
 
 1. Read `~/.claude/usage-data/session-meta/{session_id}.json`
-2. Generate a facet using the prompt in @references/facet-prompt.md —
+2. If `first_prompt` is absent or `"No prompt"` **and** `tool_counts` is empty,
+   skip this session — do not write a facet file.
+3. Otherwise, generate a facet using the prompt in @references/facet-prompt.md —
    replace `{SESSION_META_JSON}` with the raw JSON content.
-3. Parse the model response as JSON and write it to
+4. Parse the model response as JSON and write it to
    `~/.claude/usage-data/facets/{session_id}.json`
 
-Process sessions one at a time. Skip this phase if `unfaceted_ids` is empty.
+Process sessions one at a time. Skip this phase entirely if `unfaceted_ids` is empty.
 
 ---
 
@@ -88,7 +90,7 @@ clojure -M:merge \
   --checkpoint       ~/.claude/usage-insights/checkpoint.json \
   --session-meta-dir ~/.claude/usage-data/session-meta \
   --facets-dir       ~/.claude/usage-data/facets \
-  --new-session-ids  {space-separated session IDs from new_sessions} \
+  --new-session-ids  "{comma-separated session IDs from new_sessions}" \
   --config-snapshot  '{CONFIG_SNAPSHOT as JSON string}'
 ```
 

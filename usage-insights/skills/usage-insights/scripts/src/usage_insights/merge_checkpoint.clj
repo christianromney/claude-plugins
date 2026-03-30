@@ -70,24 +70,22 @@
     updated))
 
 (defn- parse-args [args]
-  (loop [args args acc {:new-session-ids []}]
+  (loop [args args acc {}]
     (cond
-      (empty? args) acc
-      (= "--new-session-ids" (first args))
-      (let [ids (vec (take-while #(not (.startsWith % "--")) (rest args)))]
-        (recur (drop (inc (count ids)) (rest args))
-               (assoc acc :new-session-ids ids)))
+      (empty? args)       acc
       (< (count args) 2) acc
       :else (recur (drop 2 args) (assoc acc (first args) (second args))))))
 
 (defn -main [& args]
   (let [opts     (parse-args args)
+        ids      (when-let [s (get opts "--new-session-ids")]
+                   (mapv clojure.string/trim (clojure.string/split s #",")))
         snapshot (json/parse-string (get opts "--config-snapshot" "{}") true)
         updated  (merge-into-checkpoint
                   (get opts "--checkpoint")
                   (get opts "--session-meta-dir")
                   (get opts "--facets-dir")
-                  (:new-session-ids opts)
+                  (or ids [])
                   snapshot)]
     (println (str "Checkpoint updated: "
                   (count (:analyzed_session_ids updated))

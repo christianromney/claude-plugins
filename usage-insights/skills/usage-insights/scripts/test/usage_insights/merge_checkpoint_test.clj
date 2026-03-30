@@ -96,6 +96,24 @@
       (is (some #{"no-facet"} (:analyzed_session_ids result)))
       (is (= 1 (get-in result [:weekly_buckets :2026-W10 :session_count]))))))
 
+(deftest parse-args-preserves-config-snapshot-after-many-ids
+  ;; Regression: previous multi-arg --new-session-ids design dropped
+  ;; --config-snapshot when many IDs were present.
+  (let [dir      (tmp-dir)
+        cp       (str dir "/checkpoint.json")
+        many-ids (clojure.string/join "," (map #(str "id-" %) (range 60)))
+        snapshot (json/generate-string {:hooks ["guard.sh"] :skills ["foo"]})]
+    (doseq [i (range 60)]
+      (make-session-meta dir (str "id-" i) "2026-03-02T10:00:00Z"))
+    (sut/merge-into-checkpoint cp
+                                (str dir "/session-meta")
+                                (str dir "/facets")
+                                (mapv #(str "id-" %) (range 60))
+                                (json/parse-string snapshot true))
+    (let [result (json/parse-string (slurp cp) true)]
+      (is (= ["guard.sh"] (get-in result [:config_snapshot :hooks])))
+      (is (= 60 (count (:analyzed_session_ids result)))))))
+
 (deftest merge-updates-config-snapshot
   (let [dir      (tmp-dir)
         cp       (str dir "/checkpoint.json")
