@@ -43,7 +43,7 @@ mkdir -p ~/.claude/usage-insights
 Run collect-sessions and capture the JSON output:
 
 ```bash
-clojure -Sdir scripts -M:collect \
+clojure -M:collect \
   --session-dir ~/.claude/usage-data/session-meta \
   --facets-dir  ~/.claude/usage-data/facets \
   --checkpoint  ~/.claude/usage-insights/checkpoint.json \
@@ -76,7 +76,7 @@ Process sessions one at a time. Skip this phase if `unfaceted_ids` is empty.
 Read the current config inventory:
 
 ```bash
-clojure -Sdir scripts -M:config --claude-dir ~/.claude
+clojure -M:config --claude-dir ~/.claude
 ```
 
 Store the JSON output as `CONFIG_SNAPSHOT`.
@@ -84,7 +84,7 @@ Store the JSON output as `CONFIG_SNAPSHOT`.
 Merge all sessions from `new_sessions` into the checkpoint:
 
 ```bash
-clojure -Sdir scripts -M:merge \
+clojure -M:merge \
   --checkpoint       ~/.claude/usage-insights/checkpoint.json \
   --session-meta-dir ~/.claude/usage-data/session-meta \
   --facets-dir       ~/.claude/usage-data/facets \
