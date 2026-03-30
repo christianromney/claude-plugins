@@ -61,9 +61,9 @@
                           (filterv #(.isAfter (Instant/parse (:start_time %)) since)
                                    all-sessions)
                           (vec all-sessions))]
-    {:new_sessions  (vec new-sessions)
-     :unfaceted_ids unfaceted-ids
-     :window_sessions window-sessions}))
+    {:new_sessions    (mapv :session_id new-sessions)
+     :unfaceted_ids   unfaceted-ids
+     :window_sessions (mapv :session_id window-sessions)}))
 
 (defn- parse-args
   "Parse a flat sequence of alternating flag/value pairs into a map."

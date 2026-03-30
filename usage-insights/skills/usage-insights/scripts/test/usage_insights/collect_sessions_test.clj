@@ -85,7 +85,7 @@
                               (str dir "/facets")
                               checkpoint nil)]
       (is (= 1 (count (:new_sessions result))))
-      (is (= "new-id" (:session_id (first (:new_sessions result))))))))
+      (is (= "new-id" (first (:new_sessions result)))))))
 
 (deftest collect-marks-unfaceted-sessions
   (let [dir (tmp-dir)]
@@ -108,7 +108,7 @@
           result    (sut/collect (str dir "/session-meta")
                                  (str dir "/facets")
                                  checkpoint since)
-          window-ids (set (map :session_id (:window_sessions result)))]
+          window-ids (set (:window_sessions result))]
       (is (contains? window-ids "recent"))
       (is (not (contains? window-ids "old"))))))
 
