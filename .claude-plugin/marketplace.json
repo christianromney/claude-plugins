@@ -13,6 +13,13 @@
       "source": "./usage-insights",
       "category": "productivity",
       "version": "1.0.0"
+    },
+    {
+      "name": "journal",
+      "description": "Publish journal entries to basic-memory (blog) or Slack (#christian-ai-journal)",
+      "source": "./journal",
+      "category": "productivity",
+      "version": "1.0.0"
     }
   ]
 }

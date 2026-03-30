@@ -1,0 +1,5 @@
+{
+  "name": "journal",
+  "version": "1.0.0",
+  "description": "Publish journal entries to basic-memory (blog) or Slack (#christian-ai-journal)"
+}
