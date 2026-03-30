@@ -1,0 +1,12 @@
+{:paths ["src"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        cheshire/cheshire    {:mvn/version "6.2.0"}}
+ :aliases
+ {:test    {:extra-paths ["test"]
+            :extra-deps  {io.github.cognitect-labs/test-runner
+                          {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+            :main-opts   ["-m" "cognitect.test-runner"
+                          "--namespace-regex" "usage-insights.*-test"]}
+  :collect {:main-opts ["-m" "usage-insights.collect-sessions"]}
+  :merge   {:main-opts ["-m" "usage-insights.merge-checkpoint"]}
+  :config  {:main-opts ["-m" "usage-insights.read-config"]}}}

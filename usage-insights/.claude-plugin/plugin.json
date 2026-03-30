@@ -1,0 +1,5 @@
+{
+  "name": "usage-insights",
+  "version": "1.0.0",
+  "description": "Generate time-aware, config-aware HTML usage insight reports from Claude Code session data with trend classification and config-awareness"
+}
