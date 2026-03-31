@@ -64,7 +64,7 @@
     (sut/merge-into-checkpoint cp
                                 (str dir "/session-meta")
                                 (str dir "/facets")
-                                ["s1"] {})
+                                ["s1"] [] {})
     (let [result (json/parse-string (slurp cp) true)]
       (is (some #{"s1"} (:analyzed_session_ids result)))
       (is (contains? (:weekly_buckets result) :2026-W10)))))
@@ -79,7 +79,7 @@
     (sut/merge-into-checkpoint cp
                                 (str dir "/session-meta")
                                 (str dir "/facets")
-                                ["s1"] {})
+                                ["s1"] [] {})
     (let [result (json/parse-string (slurp cp) true)]
       ;; weekly_buckets should remain empty — s1 was already analyzed
       (is (= {} (:weekly_buckets result))))))
@@ -91,7 +91,7 @@
     (sut/merge-into-checkpoint cp
                                 (str dir "/session-meta")
                                 (str dir "/facets")
-                                ["no-facet"] {})
+                                ["no-facet"] [] {})
     (let [result (json/parse-string (slurp cp) true)]
       (is (some #{"no-facet"} (:analyzed_session_ids result)))
       (is (= 1 (get-in result [:weekly_buckets :2026-W10 :session_count]))))))
@@ -109,6 +109,7 @@
                                 (str dir "/session-meta")
                                 (str dir "/facets")
                                 (mapv #(str "id-" %) (range 60))
+                                []
                                 (json/parse-string snapshot true))
     (let [result (json/parse-string (slurp cp) true)]
       (is (= ["guard.sh"] (get-in result [:config_snapshot :hooks])))
@@ -123,6 +124,44 @@
     (sut/merge-into-checkpoint cp
                                 (str dir "/session-meta")
                                 (str dir "/facets")
-                                ["s1"] snapshot)
+                                ["s1"] [] snapshot)
     (let [result (json/parse-string (slurp cp) true)]
       (is (= ["my-hook.sh"] (get-in result [:config_snapshot :hooks]))))))
+
+(deftest merge-stores-ignored-session-ids
+  (let [dir (tmp-dir)
+        cp  (str dir "/checkpoint.json")]
+    (sut/merge-into-checkpoint cp
+                                (str dir "/session-meta")
+                                (str dir "/facets")
+                                [] ["bad-id-1" "bad-id-2"] {})
+    (let [result (json/parse-string (slurp cp) true)]
+      (is (= #{"bad-id-1" "bad-id-2"}
+             (set (:ignored_session_ids result)))))))
+
+(deftest merge-appends-to-existing-ignored-session-ids
+  (let [dir (tmp-dir)
+        cp  (str dir "/checkpoint.json")]
+    (write-json cp {:version 1 :analyzed_session_ids []
+                    :ignored_session_ids ["existing-bad"]
+                    :weekly_buckets {} :config_snapshot {} :last_updated ""})
+    (sut/merge-into-checkpoint cp
+                                (str dir "/session-meta")
+                                (str dir "/facets")
+                                [] ["new-bad"] {})
+    (let [result (json/parse-string (slurp cp) true)]
+      (is (= #{"existing-bad" "new-bad"}
+             (set (:ignored_session_ids result)))))))
+
+(deftest merge-deduplicates-ignored-session-ids
+  (let [dir (tmp-dir)
+        cp  (str dir "/checkpoint.json")]
+    (write-json cp {:version 1 :analyzed_session_ids []
+                    :ignored_session_ids ["dup-id"]
+                    :weekly_buckets {} :config_snapshot {} :last_updated ""})
+    (sut/merge-into-checkpoint cp
+                                (str dir "/session-meta")
+                                (str dir "/facets")
+                                [] ["dup-id"] {})
+    (let [result (json/parse-string (slurp cp) true)]
+      (is (= 1 (count (:ignored_session_ids result)))))))

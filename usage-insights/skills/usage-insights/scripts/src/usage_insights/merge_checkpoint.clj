@@ -34,11 +34,11 @@
     (if (.exists f)
       (json/parse-string (slurp f) true)
       {:version 1 :last_updated "" :analyzed_session_ids []
-       :config_snapshot {} :weekly_buckets {}})))
+       :ignored_session_ids [] :config_snapshot {} :weekly_buckets {}})))
 
 (defn merge-into-checkpoint
-  "Read checkpoint at path, merge new-session-ids, write result back. Returns updated checkpoint."
-  [checkpoint-path session-meta-dir facets-dir new-session-ids config-snapshot]
+  "Read checkpoint at path, merge new-session-ids and ignored-session-ids, write result back. Returns updated checkpoint."
+  [checkpoint-path session-meta-dir facets-dir new-session-ids ignored-session-ids config-snapshot]
   (let [checkpoint   (load-checkpoint checkpoint-path)
         analyzed-ids (set (:analyzed_session_ids checkpoint))
         meta-dir     (io/file session-meta-dir)
@@ -63,7 +63,9 @@
                                 (update checkpoint' :analyzed_session_ids conj session-id))))))
                       (-> checkpoint
                           (assoc :config_snapshot config-snapshot)
-                          (assoc :last_updated (str (Instant/now))))
+                          (assoc :last_updated (str (Instant/now)))
+                          (update :ignored_session_ids
+                                  #(vec (distinct (concat (or % []) ignored-session-ids)))))
                       new-session-ids)]
     (.mkdirs (.getParentFile (io/file checkpoint-path)))
     (spit checkpoint-path (json/generate-string updated {:pretty true}))
@@ -77,16 +79,19 @@
       :else (recur (drop 2 args) (assoc acc (first args) (second args))))))
 
 (defn -main [& args]
-  (let [opts     (parse-args args)
-        ids      (when-let [s (get opts "--new-session-ids")]
-                   (mapv clojure.string/trim (clojure.string/split s #",")))
-        snapshot (json/parse-string (get opts "--config-snapshot" "{}") true)
-        updated  (merge-into-checkpoint
-                  (get opts "--checkpoint")
-                  (get opts "--session-meta-dir")
-                  (get opts "--facets-dir")
-                  (or ids [])
-                  snapshot)]
+  (let [opts        (parse-args args)
+        ids         (when-let [s (get opts "--new-session-ids")]
+                      (mapv clojure.string/trim (clojure.string/split s #",")))
+        ignored-ids (when-let [s (get opts "--ignored-session-ids")]
+                      (mapv clojure.string/trim (clojure.string/split s #",")))
+        snapshot    (json/parse-string (get opts "--config-snapshot" "{}") true)
+        updated     (merge-into-checkpoint
+                     (get opts "--checkpoint")
+                     (get opts "--session-meta-dir")
+                     (get opts "--facets-dir")
+                     (or ids [])
+                     (or ignored-ids [])
+                     snapshot)]
     (println (str "Checkpoint updated: "
                   (count (:analyzed_session_ids updated))
                   " total sessions analyzed"))))
