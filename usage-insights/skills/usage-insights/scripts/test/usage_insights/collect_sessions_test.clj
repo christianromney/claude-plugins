@@ -92,10 +92,11 @@
 (deftest load-sessions-silently-skips-already-ignored-ids
   (let [dir (tmp-dir)]
     (write-corrupt-json (str dir "/session-meta/bad-id.json"))
-    (let [output (java.io.StringWriter.)]
-      (binding [*err* output]
-        (sut/load-sessions (str dir "/session-meta") #{"bad-id"}))
-      (is (not (.contains (str output) "WARNING"))))))
+    (let [output (java.io.StringWriter.)
+          result (binding [*err* output]
+                   (sut/load-sessions (str dir "/session-meta") #{"bad-id"}))]
+      (is (not (.contains (str output) "WARNING")))
+      (is (= [] (:ignore_sessions result))))))
 
 (deftest collect-includes-ignore-sessions-in-output
   (let [dir (tmp-dir)]

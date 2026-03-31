@@ -54,6 +54,35 @@ Parse the JSON output. Store:
 - `new_sessions` — sessions not yet in the checkpoint
 - `unfaceted_ids` — new sessions that lack a facet file
 - `window_sessions` — sessions to include in the report narrative
+- `ignore_sessions` — session IDs that failed to parse
+
+**Short-circuit check:** If `new_sessions` is empty **and** `ignore_sessions` is empty:
+
+1. Read the fresh config:
+   ```bash
+   clojure -M:config --claude-dir ~/.claude
+   ```
+2. Read the stored config snapshot from the checkpoint:
+   ```bash
+   jq -c '.config_snapshot' ~/.claude/usage-insights/checkpoint.json
+   ```
+3. Compare the two JSON objects. If they are semantically identical, print:
+   ```
+   No new sessions or config changes since last report.
+   Most recent report: ~/.claude/usage-insights/report-{most recent filename}.
+   Note: the current session will be included in the next run.
+   ```
+   Then stop — do not proceed to Phase 2.
+
+**Ignore prompt:** For each ID in `ignore_sessions`, ask the user:
+
+> Session `{id}` appears corrupted. Ignore it and continue?
+
+- If **yes**: add the ID to a `confirmed_ignore_ids` list. Inform the user:
+  "Added `{id}` to the ignore list — it will be skipped on all future runs."
+- If **no**: print "Aborting analysis." and stop.
+
+Proceed to Phase 2 only after all `ignore_sessions` prompts are resolved.
 
 ---
 
@@ -87,15 +116,16 @@ Merge all sessions from `new_sessions` into the checkpoint:
 
 ```bash
 clojure -M:merge \
-  --checkpoint       ~/.claude/usage-insights/checkpoint.json \
-  --session-meta-dir ~/.claude/usage-data/session-meta \
-  --facets-dir       ~/.claude/usage-data/facets \
-  --new-session-ids  "{comma-separated session IDs from new_sessions}" \
-  --config-snapshot  '{CONFIG_SNAPSHOT as JSON string}'
+  --checkpoint         ~/.claude/usage-insights/checkpoint.json \
+  --session-meta-dir   ~/.claude/usage-data/session-meta \
+  --facets-dir         ~/.claude/usage-data/facets \
+  --new-session-ids    "{comma-separated session IDs from new_sessions}" \
+  --config-snapshot    '{CONFIG_SNAPSHOT as JSON string}' \
+  --ignored-session-ids "{comma-separated IDs from confirmed_ignore_ids}"
 ```
 
-If `new_sessions` is empty, run the merge command without `--new-session-ids`
-to refresh the config snapshot in the checkpoint.
+If `new_sessions` is empty, omit `--new-session-ids`.
+If `confirmed_ignore_ids` is empty, omit `--ignored-session-ids`.
 
 ---
 
@@ -175,4 +205,5 @@ Print to the terminal:
 Report written to: ~/.claude/usage-insights/report-{TIMESTAMP}.html
 Sessions in scope: {count of window_sessions}
 Checkpoint: ~/.claude/usage-insights/checkpoint.json ({count of analyzed_session_ids} total sessions analyzed)
+Note: the current session will be included in the next run.
 ```
