@@ -41,6 +41,20 @@
       "source": "./jujutsu",
       "category": "reference",
       "version": "1.0.0"
+    },
+    {
+      "name": "sync",
+      "description": "Sync dotfiles and personal notes to remote repositories",
+      "source": "./sync",
+      "category": "productivity",
+      "version": "1.0.0"
+    },
+    {
+      "name": "socratic-partner",
+      "description": "Problem-solving thinking partner using the Socratic method",
+      "source": "./socratic-partner",
+      "category": "productivity",
+      "version": "1.0.0"
     }
   ]
 }

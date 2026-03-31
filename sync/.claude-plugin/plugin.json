@@ -1,0 +1,5 @@
+{
+  "name": "sync",
+  "version": "1.0.0",
+  "description": "Sync dotfiles and personal notes to remote repositories"
+}
