@@ -68,13 +68,56 @@
 (deftest parse-since-nil-returns-nil
   (is (nil? (sut/parse-since nil))))
 
+(defn- write-corrupt-json [path]
+  (io/make-parents path)
+  (spit path (str "{ \"session_id\": \"corrupt\"" (char 0) " }")))
+
 (deftest load-sessions-reads-all-json
   (let [dir (tmp-dir)]
     (make-session dir "id-1" "2026-03-01T10:00:00Z")
     (make-session dir "id-2" "2026-03-02T10:00:00Z")
-    (let [sessions (sut/load-sessions (str dir "/session-meta"))]
+    (let [{:keys [sessions]} (sut/load-sessions (str dir "/session-meta") #{})]
       (is (= 2 (count sessions)))
       (is (= #{"id-1" "id-2"} (set (map :session_id sessions)))))))
+
+(deftest load-sessions-returns-ignore-sessions-for-corrupt-files
+  (let [dir (tmp-dir)]
+    (make-session dir "good-id" "2026-03-01T10:00:00Z")
+    (write-corrupt-json (str dir "/session-meta/bad-id.json"))
+    (let [{:keys [sessions ignore_sessions]}
+          (sut/load-sessions (str dir "/session-meta") #{})]
+      (is (= 1 (count sessions)))
+      (is (= ["bad-id"] ignore_sessions)))))
+
+(deftest load-sessions-silently-skips-already-ignored-ids
+  (let [dir (tmp-dir)]
+    (write-corrupt-json (str dir "/session-meta/bad-id.json"))
+    (let [output (java.io.StringWriter.)]
+      (binding [*err* output]
+        (sut/load-sessions (str dir "/session-meta") #{"bad-id"}))
+      (is (not (.contains (str output) "WARNING"))))))
+
+(deftest collect-includes-ignore-sessions-in-output
+  (let [dir (tmp-dir)]
+    (make-session dir "good-id" "2026-03-01T10:00:00Z")
+    (write-corrupt-json (str dir "/session-meta/bad-id.json"))
+    (let [checkpoint {:version 1 :analyzed_session_ids [] :ignored_session_ids []
+                      :weekly_buckets {}}
+          result (sut/collect (str dir "/session-meta")
+                              (str dir "/facets")
+                              checkpoint nil)]
+      (is (= ["bad-id"] (:ignore_sessions result))))))
+
+(deftest collect-skips-sessions-in-ignored-session-ids
+  (let [dir (tmp-dir)]
+    (write-corrupt-json (str dir "/session-meta/bad-id.json"))
+    (let [checkpoint {:version 1 :analyzed_session_ids [] :ignored_session_ids ["bad-id"]
+                      :weekly_buckets {}}
+          result (sut/collect (str dir "/session-meta")
+                              (str dir "/facets")
+                              checkpoint nil)]
+      (is (= [] (:ignore_sessions result)))
+      (is (= [] (:new_sessions result))))))
 
 (deftest collect-excludes-already-analyzed
   (let [dir (tmp-dir)]

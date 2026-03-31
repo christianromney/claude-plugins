@@ -30,40 +30,58 @@
                          (str since-str "T00:00:00Z")))))))
 
 (defn load-sessions
-  "Read all session-meta JSON files from session-dir; skip files that fail to parse."
-  [session-dir]
+  "Read all session-meta JSON files from session-dir.
+   Silently skips files whose ID appears in ignored-ids.
+   Returns {:sessions [...] :ignore_sessions [...]} where :ignore_sessions
+   contains IDs of files that failed to parse and are not already ignored."
+  [session-dir ignored-ids]
   (let [dir (io/file session-dir)]
     (if (.isDirectory dir)
-      (->> (.listFiles dir)
-           (filter #(.. % getName (endsWith ".json")))
-           (keep (fn [f]
-                   (try (json/parse-string (slurp f) true)
-                        (catch Exception e
-                          (binding [*out* *err*]
-                            (println (str "WARNING: failed to parse session file " (.getName f) ": " (.getMessage e))))
-                          nil)))))
-      [])))
+      (reduce
+       (fn [{:keys [sessions ignore_sessions]} f]
+         (let [id (subs (.getName f) 0 (- (count (.getName f)) 5))]
+           (cond
+             (contains? ignored-ids id)
+             {:sessions sessions :ignore_sessions ignore_sessions}
+
+             :else
+             (try
+               {:sessions (conj sessions (json/parse-string (slurp f) true))
+                :ignore_sessions ignore_sessions}
+               (catch Exception e
+                 (binding [*out* *err*]
+                   (println (str "WARNING: failed to parse session file "
+                                 (.getName f) ": " (.getMessage e))))
+                 {:sessions sessions
+                  :ignore_sessions (conj ignore_sessions id)})))))
+       {:sessions [] :ignore_sessions []}
+       (->> (.listFiles dir)
+            (filter #(.. % getName (endsWith ".json")))))
+      {:sessions [] :ignore_sessions []})))
 
 (defn collect
-  "Return {:new_sessions [...] :unfaceted_ids [...] :window_sessions [...]}.
+  "Return {:new_sessions [...] :unfaceted_ids [...] :window_sessions [...] :ignore_sessions [...]}.
    new_sessions: not yet in checkpoint.
    unfaceted_ids: new sessions without an existing facet file.
-   window_sessions: all sessions on or after since (or all if since is nil)."
+   window_sessions: all sessions on or after since (or all if since is nil).
+   ignore_sessions: session IDs that failed to parse (not already in ignored_session_ids)."
   [session-dir facets-dir checkpoint since]
-  (let [analyzed-ids (set (:analyzed_session_ids checkpoint))
-        all-sessions (load-sessions session-dir)
-        new-sessions (remove #(analyzed-ids (:session_id %)) all-sessions)
+  (let [analyzed-ids  (set (:analyzed_session_ids checkpoint))
+        ignored-ids   (set (:ignored_session_ids checkpoint))
+        {:keys [sessions ignore_sessions]} (load-sessions session-dir ignored-ids)
+        new-sessions  (remove #(analyzed-ids (:session_id %)) sessions)
         unfaceted-ids (->> new-sessions
                            (remove #(.exists (io/file facets-dir
                                                       (str (:session_id %) ".json"))))
                            (mapv :session_id))
         window-sessions (if since
                           (filterv #(.isAfter (Instant/parse (:start_time %)) since)
-                                   all-sessions)
-                          (vec all-sessions))]
+                                   sessions)
+                          (vec sessions))]
     {:new_sessions    (mapv :session_id new-sessions)
      :unfaceted_ids   unfaceted-ids
-     :window_sessions (mapv :session_id window-sessions)}))
+     :window_sessions (mapv :session_id window-sessions)
+     :ignore_sessions ignore_sessions}))
 
 (defn- parse-args
   "Parse a flat sequence of alternating flag/value pairs into a map."
