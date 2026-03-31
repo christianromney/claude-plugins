@@ -63,11 +63,79 @@ Our diagrams adopt the following conventions:
 - [Sequence Diagrams](https://en.wikipedia.org/wiki/Sequence_diagram) show process interactions arranged in time sequence. Tip: prefer labeling lines with wording that conveys ordering vs adding sequence numbers prefer numbering processes over lines.
 - The [Sequence](https://mermaid.js.org/syntax/sequenceDiagram.html) diagram type should be used for Sequence Diagrams.
 
-### Component Diagrams 
+### Component Diagrams
 - [Component Diagrams](https://en.wikipedia.org/wiki/Component_diagram) depict the runtime structure of a system. Components are abstract concepts that can represent parts of a system at different levels of scale. [C4](https://c4model.com/) diagrams are component diagrams.
 - The [C4](https://mermaid.js.org/syntax/c4.html) diagram type should be used for Component Diagrams.
 
+## Rendering to Image Files with mmdc
 
+The `mmdc` CLI tool (mermaid-cli) renders `.mmd` or `.md` source files into image files. Use it when the user wants a PNG, SVG, or PDF output rather than inline Markdown.
 
+### Basic Usage
+
+Write the diagram source to a `.mmd` file, then render it:
+
+```bash
+# SVG (default when no -e flag)
+mmdc -i diagram.mmd -o diagram.svg
+
+# PNG
+mmdc -i diagram.mmd -o diagram.png
+
+# PDF
+mmdc -i diagram.mmd -o diagram.pdf
+```
+
+The output format is inferred from the `-o` file extension. Override it explicitly with `-e svg|png|pdf`.
+
+### Common Options
+
+| Flag | Description | Example |
+|------|-------------|---------|
+| `-i` | Input `.mmd` or `.md` file (required) | `-i input.mmd` |
+| `-o` | Output file path | `-o output.png` |
+| `-t` | Theme: `default`, `forest`, `dark`, `neutral` | `-t dark` |
+| `-b` | Background color for PNG/SVG | `-b transparent` or `-b '#F0F0F0'` |
+| `-w` | Page width in pixels (default 800) | `-w 1200` |
+| `-H` | Page height in pixels (default 600) | `-H 900` |
+| `-s` | Puppeteer scale factor (default 1) | `-s 2` |
+| `-c` | JSON config file for mermaid options | `-c config.json` |
+| `-C` | CSS file for custom styling/animation | `-C style.css` |
+| `-q` | Suppress log output | `-q` |
+| `-e` | Force output format | `-e png` |
+
+### Practical Examples
+
+**PNG with dark theme and transparent background:**
+```bash
+mmdc -i input.mmd -o output.png -t dark -b transparent
+```
+
+**High-resolution PNG (2× scale):**
+```bash
+mmdc -i diagram.mmd -o diagram.png -s 2 -w 1600 -H 1200
+```
+
+**SVG with custom CSS animations:**
+```bash
+mmdc -i diagram.mmd -o diagram.svg --cssFile style.css
+```
+
+**Process all diagrams in a Markdown file** (generates separate SVG artefacts and updates image references in the output):
+```bash
+mmdc -i readme.template.md -o readme.md
+```
+
+**Read diagram from stdin, write SVG to stdout:**
+```bash
+echo "graph LR; A-->B" | mmdc -i - -o - -e svg
+```
+
+### Workflow
+
+1. Write mermaid source to a `.mmd` file (or inline in `.md`).
+2. Run `mmdc` with the desired output format and options.
+3. If the user needs a specific size or theme, apply `-w`, `-H`, `-s`, and `-t` flags.
+4. For transparent backgrounds (common in dark-mode contexts), use `-b transparent`.
 
 
