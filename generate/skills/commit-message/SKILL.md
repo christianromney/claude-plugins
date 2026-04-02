@@ -31,9 +31,10 @@ A good commit message looks like this:
     please do proper word-wrap and keep columns shorter than about
     74 characters or so. That way "git log" will show things
     nicely even when it's indented.
-
-    Reported-by: {whoever-reported-it}
-    Signed-off-by: Your Name <youremail@yourhost.com>
+    
+    Reported-by: {reporter}
+    Session: {claude-session-id}
+    Co-Authored-By: {claude-model} <noreply@anthropic.com>
 
 where that header line really should be meaningful, and really should be
 just one line.  That header line is what is shown by tools like `gitk` and
@@ -42,7 +43,10 @@ independently of the longer explanation. Please use verbs in the
 imperative in the commit message, as in "Fix bug that...", "Add
 file/feature ...", or "Make component..."
 
-### What NOT To Do
+- The Reported-by line should only be included if the information is known from
+  a Jira ticket or supplied by the user. 
+- To get {claude-session-id}: run `scripts/claude-session-id` (bundled with this skill — resolve the path from this skill's base directory). If it produces no output, omit the Session: trailer entirely.
 
-- **NEVER** add a prefix like 'docs: <message>' or 'feat: <message>'
-- **NEVER** include emojis in commit messages
+### What NOT To Do
+- Never add a prefix like 'docs: <message>' or 'feat: <message>'
+- Never include emojis in commit messages

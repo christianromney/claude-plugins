@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Prints the active Claude Code session ID for the given project directory.
+# Usage: claude-session-id [project-dir]   (defaults to $PWD)
+# Exits 0 with no output when no session is found.
+
+set -euo pipefail
+
+project_dir="${1:-$PWD}"
+project_key="${project_dir//[\/.]/-}"
+session_dir="$HOME/.claude/projects/$project_key"
+
+[[ -d "$session_dir" ]] || exit 0
+
+session_file=$(ls -t "$session_dir"/*.jsonl 2>/dev/null | head -1)
+[[ -n "$session_file" ]] || exit 0
+basename "$session_file" .jsonl
