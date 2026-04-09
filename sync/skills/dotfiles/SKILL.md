@@ -13,6 +13,15 @@ operation.
 
 Follow these steps carefully:
 
+## 0. Re-add Session Edits
+
+Before checking status, review what files in `~/.claude/` were written or edited
+during this session. For each such file, run `chezmoi re-add <file>` now (using
+the full path). This replaces the PostToolUse hook that previously did this
+automatically on every Edit/Write.
+
+Skip this step if no `~/.claude/` files were touched this session.
+
 ## 1. Check Status
 
 Run `chezmoi status` and interpret the two-column output for the user:
@@ -28,15 +37,23 @@ and stop.
 
 ## 2. Show Differences
 
-Run `chezmoi diff` to display what changed. Note that the diff shows:
-- Left side = what chezmoi would apply (source/target state)
-- Right side = what is currently in the home directory
+Run `chezmoi diff` to display what changed. The diff is displayed via delta in
+side-by-side mode. The orientation is:
+- Left side (red/minus) = what is currently in the home directory
+- Right side (green/plus) = what chezmoi would apply (source/target state)
+
+This is standard diff convention: left = current (old), right = new. Do not
+invert this — confusing the sides will cause you to misidentify which changes
+belong to source vs. home.
 
 ## 3. Ask for Confirmation
 
 Ask the user if they want to proceed with syncing these changes. For any `MM`
-(conflict) files, ask explicitly: should the **source win** or the **home
-directory win**?
+(conflict) files, enumerate the specific unique changes on each side (not just
+"source" vs "home") and ask the user what the desired final value should be for
+each change. Do not ask which side "wins" wholesale — the user needs to see
+exactly what will be discarded before confirming. `chezmoi apply --force` is
+irreversible once autoCommit pushes it.
 
 ## 4. Sync Changes
 
