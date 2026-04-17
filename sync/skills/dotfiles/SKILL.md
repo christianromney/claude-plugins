@@ -1,19 +1,34 @@
 ---
 name: sync:dotfiles
-description: Sync modified dotfiles to remote repository using chezmoi
+description: Sync dotfiles bidirectionally between home directory and remote repository using chezmoi
 user_invocable: true
 ---
 
 # Sync Dotfiles with Chezmoi
 
-Sync the user's modified dotfiles to the remote repository using chezmoi. The
-user's chezmoi configuration is set up with `git.autoCommit` and `git.autoPush`
-enabled, so chezmoi will automatically commit and push changes after each sync
-operation.
+Sync the user's dotfiles bidirectionally using chezmoi — pull remote changes
+from another machine and push local changes to the remote. The user's chezmoi
+configuration has `git.autoCommit` and `git.autoPush` enabled, so local-to-remote
+sync is automatic after each re-add.
 
 Follow these steps carefully:
 
-## 0. Re-add Session Edits
+## 0. Pull Remote Changes
+
+Pull any changes pushed from another machine:
+
+```bash
+chezmoi update --apply=false
+```
+
+This fetches and merges remote commits into the source dir without touching
+the home directory. After this, `chezmoi status` will show `M ` for any files
+the remote changed that differ from home.
+
+If the pull fails (network, auth), report the error and ask whether to
+continue with local-only sync.
+
+## 1. Re-add Session Edits
 
 Before checking status, review what files in `~/.claude/` were written or edited
 during this session. For each such file, run `chezmoi re-add <file>` now (using
@@ -22,7 +37,7 @@ automatically on every Edit/Write.
 
 Skip this step if no `~/.claude/` files were touched this session.
 
-## 1. Check Status
+## 2. Check Status
 
 Run `chezmoi status` and interpret the two-column output for the user:
 
@@ -35,7 +50,7 @@ Run `chezmoi status` and interpret the two-column output for the user:
 If no files are modified, inform the user that the repository is already synced
 and stop.
 
-## 2. Show Differences
+## 3. Show Differences
 
 Run `chezmoi diff` to display what changed. The diff is displayed via delta in
 side-by-side mode. The orientation is:
@@ -46,7 +61,7 @@ This is standard diff convention: left = current (old), right = new. Do not
 invert this — confusing the sides will cause you to misidentify which changes
 belong to source vs. home.
 
-## 3. Ask for Confirmation
+## 4. Ask for Confirmation
 
 Ask the user if they want to proceed with syncing these changes. For any `MM`
 (conflict) files, enumerate the specific unique changes on each side (not just
@@ -55,7 +70,7 @@ each change. Do not ask which side "wins" wholesale — the user needs to see
 exactly what will be discarded before confirming. `chezmoi apply --force` is
 irreversible once autoCommit pushes it.
 
-## 4. Sync Changes
+## 5. Sync Changes
 
 For each modified file, select the appropriate command based on its source
 attributes. Use `chezmoi source-path <file>` to get the source filename, then
@@ -68,11 +83,17 @@ inspect it:
 | Template (source ends in `.tmpl`), not encrypted | `chezmoi add --template <file>` |
 | Template, encrypted | `chezmoi add --template --encrypt <file>` |
 
+For ` M` files (home changed, source unchanged — push):
+- Use the appropriate `add` command from the table above
+
+For `M ` files (source changed, home unchanged — pulled from remote):
+- `chezmoi apply --force <file>`
+
 For `MM` conflict files:
 - **Source wins** → `chezmoi apply --force <file>`
 - **Home dir wins** → use the appropriate `add` command from the table above
 
-## 5. Verify and Confirm
+## 6. Verify and Confirm
 
 Run `chezmoi status` again after syncing. If any files are still listed as
 modified, `chezmoi re-add` likely silently skipped a template file — re-run
