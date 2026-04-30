@@ -44,10 +44,10 @@
     },
     {
       "name": "sync",
-      "description": "Sync dotfiles and personal notes to remote repositories",
+      "description": "Sync dotfiles, personal-notes, and work-notes repositories to GitHub",
       "source": "./sync",
       "category": "productivity",
-      "version": "1.1.0"
+      "version": "1.2.0"
     },
     {
       "name": "socratic-partner",
