@@ -61,7 +61,7 @@
       "description": "Compare candidate solutions against weighted criteria using a decision matrix",
       "source": "./decision-matrix",
       "category": "productivity",
-      "version": "1.0.0"
+      "version": "1.1.0"
     }
   ]
 }

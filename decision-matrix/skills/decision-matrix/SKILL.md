@@ -59,6 +59,7 @@ of the following emoji:
 
 - 🟢 — clearly favorable on this criterion
 - 🟡 — meaningful tradeoff, drawback, or partial fit
+- 🟠 — optional; a very strong, nearly-but-not-quite disqualifying tradeoff. Reach for orange only when 🟡 understates the severity but 🔴 overstates it. Never the default for "this is bad"; that is what 🟡 is for
 - 🔴 — disqualifying weakness; rules the candidate out
 
 Cells that are neither favorable nor unfavorable receive **no** prefix.
@@ -66,16 +67,44 @@ Resist coloring every cell. Neutral judgments are common and honest; forcing
 a verdict where none exists hides the very uncertainty the matrix should
 surface.
 
-A column with only 🟢 is suspicious. So is one with only 🔴. Almost every
-real option has a mix of pros and cons; a single-color column usually
-signals bias, incomplete criteria, or a candidate that hasn't been
+A column with only 🟢 is suspicious. So is one with only 🔴 or only 🟠.
+Almost every real option has a mix of pros and cons; a single-color column
+usually signals bias, incomplete criteria, or a candidate that hasn't been
 scrutinized as carefully as the others. When you see this, pause and
 challenge the analysis before drawing conclusions.
 
-Use 🔴 sparingly. Reserve it for evaluations that genuinely disqualify a
-solution, not for "I dislike this." Reaching for red on multiple candidates
-across multiple criteria typically means the criteria are encoding
-preferences as hard constraints — revisit them.
+Use 🔴 and 🟠 sparingly. Reserve 🔴 for evaluations that genuinely
+disqualify a solution, not for "I dislike this." Reserve 🟠 for the
+narrower case where the drawback is severe enough to dominate the
+recommendation but does not strictly rule the candidate out. Reaching for
+red or orange on multiple candidates across multiple criteria typically
+means the criteria are encoding preferences as hard constraints — revisit
+them.
+
+## Ambiguous evidence
+
+When the available evidence supports more than one interpretation, do not
+pick the most-pessimistic (or most-optimistic) reading as the default and
+color accordingly. Enumerate both possibilities with their respective
+verdict signals separated by `/`, and name the disambiguating information
+that would settle the question.
+
+Example cell content:
+
+> 🔴 / 🟢 If EU is the only supported residency (the literal reading of
+> public docs), blocks BR/MX/CO regulated workloads; if EU is named only
+> for GDPR salience and other regions are also supported, accommodates
+> BR/MX/CO. Vendor confirmation needed.
+
+Absence of evidence is not evidence of absence. A cell that defaults to 🔴
+from "feature not documented" hides the uncertainty behind a judgment that
+may be wrong, and a reader who sees only red won't ask the question that
+would have resolved it. Surfacing both readings forces the question into
+the open — which is what the matrix exists to do.
+
+This applies to any criterion, not just data residency: when the
+public-source reading and a plausible alternative point in opposite
+directions, render both rather than choosing.
 
 ## Output format
 
