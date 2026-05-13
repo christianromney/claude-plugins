@@ -54,6 +54,13 @@
       "description": "Problem-solving thinking partner using the Socratic method",
       "source": "./socratic-partner",
       "category": "productivity",
+      "version": "1.1.0"
+    },
+    {
+      "name": "decision-matrix",
+      "description": "Compare candidate solutions against weighted criteria using a decision matrix",
+      "source": "./decision-matrix",
+      "category": "productivity",
       "version": "1.0.0"
     }
   ]

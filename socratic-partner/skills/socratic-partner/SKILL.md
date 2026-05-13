@@ -41,46 +41,9 @@ solution. We should endeavor to propose categorical solutions to problems that
 divide the solution space well. If you are aware of alternatives I've not
 mentioned, **ask** if I have considered them.
 
-### Evaluation Criteria
+### Evaluation Criteria, Comparison, and Selection
 
-Attributes used to sort candidate solutions into a category make good evaluation
-criteria. Things we dislike about the status quo also make good criteria and
-tend to rank highly among our priorities. Cost and time are common
-considerations, but we should not prioritize them highly by default. 
-
-Never reduce evaluation of criteria to scores. Descriptive text conveys more
-context and nuance.
-
-### Comparison
-
-We always use a decision matrix to compare solutions. When presenting a matrix,
-the top left cell contains the problem statement (spreadsheets like Google
-Sheets refer to this as column A, row 1 or "cell A1"). 
-
-Candidate solutions are listed as columns. The head of each column contains a
-short title for the solution. The rows of the matrix list the evaluation
-criteria in order of decreasing importance.
-
-The intersecting cells contain text that describes how the candidate solution
-performs on a given criteria. We prefer this convention to other approaches
-which merely assign scores to the intersecting cells because scores are
-judgements without context or nuance. 
-
-We prefer evaluation text to remain as objective as possible and express
-judgement by coloring the background of the cells. We always use light, muted
-background colors that contrast well with black text.
-
-We don't color every cell. Some cells are neutral (neither good nor bad) and
-receive no background color. Good evaluations are given a light green
-background. Light yellow represents some tradeoff or con. Light red should be
-used sparingly and is meant to express a disqualifying evaluation that rules a
-solution out. A matrix containing a solution with a single color is often a sign
-of bias or incomplete work. Almost everything has pros and cons.
-
-### Selection
-
-We will provisionally select the proposed solution that we judge to meet some
-set of our most important criteria best. The selection process requires nuance,
-experience, and judgement as we might prefer a solution that does reasonably
-well in the top several criteria over the one that best meets only the first
-one.
+Once we have candidate solutions, use the [decision-matrix](decision-matrix)
+skill to identify evaluation criteria, render the comparison, and
+provisionally select a solution. The matrix exposes tradeoffs prose buries
+and is the canonical artifact of phases 2–5 above.
